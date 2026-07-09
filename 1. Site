@@ -21,19 +21,19 @@ This is the official website for the Patidar Cricket League tournament, featurin
 ```bash
 node server.js
 # Visit http://localhost:3000
+```
 
+## Admin Access
+- URL: `http://localhost:3000/#/admin`
+- Password: `PCL@Admin2024`
 
+## Setup & Deployment Instructions
 
- **Setup & Deployment Instructions**
-```markdown
-# Setup Instructions
-
-## Local Development
+### Local Development
 1. Clone the repository
 2. Run: `node server.js`
 3. Open: http://localhost:3000
 
-## Deployment
 ### On Vercel
 - Connect your GitHub repo
 - Set command: `node server.js`
@@ -44,4 +44,30 @@ node server.js
 - Deploy
 
 ### Firebase Configuration
-Update `firebase-config.js` with your credentials:
+Update `firebase-config.js` with your Firebase credentials:
+- apiKey
+- authDomain
+- projectId
+- storageBucket
+- messagingSenderId
+- appId
+
+## Project Structure
+```
+├── index.html              (Production website)
+├── server.js               (Node.js server)
+├── firebase-config.js      (Firebase credentials)
+├── images/                 (Team logos & assets)
+└── developer_source/       (Source files for edits)
+    ├── index_client.html
+    └── merge_code.js
+```
+
+## Tournament Info
+- **League Name**: Patidar Cricket League (PCL)
+- **Season**: Yuvakmandal Secundrabad - Garud Production
+- **Teams**: 8 teams
+- **Format**: T20 Cricket
+
+---
+Last Updated: 2024
