@@ -1,1 +1,47 @@
+# Patidar Cricket League (PCL) Website
 
+## Overview
+This is the official website for the Patidar Cricket League tournament, featuring live match updates, team management, points tables, and fixture scheduling.
+
+## Features
+- 🎬 **Live Match Updates** - Real-time commentary and scoreboard
+- 📊 **Points Table** - Live standings and team statistics
+- 🗓️ **Fixtures & Results** - Complete match schedule
+- 👥 **Team Management** - Team profiles and player information
+- 📱 **Responsive Design** - Works on all devices
+- 🔒 **Admin Panel** - Secure tournament management
+
+## Tech Stack
+- **Frontend**: React 18, Tailwind CSS
+- **Database**: Firebase Firestore
+- **Server**: Node.js (built-in, no npm required)
+- **Hosting**: Ready for deployment
+
+## Quick Start
+```bash
+node server.js
+# Visit http://localhost:3000
+
+
+
+ **Setup & Deployment Instructions**
+```markdown
+# Setup Instructions
+
+## Local Development
+1. Clone the repository
+2. Run: `node server.js`
+3. Open: http://localhost:3000
+
+## Deployment
+### On Vercel
+- Connect your GitHub repo
+- Set command: `node server.js`
+- Port: 3000
+
+### On Heroku
+- Create `Procfile`: `web: node server.js`
+- Deploy
+
+### Firebase Configuration
+Update `firebase-config.js` with your credentials:
