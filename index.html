@@ -704,7 +704,12 @@ function Hero({
   })), /*#__PURE__*/React.createElement("button", {
     onClick: () => setSection("points"),
     className: "bg-white-10 text-white font-body font-semibold text-sm px-5 py-2.5 rounded-md"
-  }, "Points table")), heroMatch && /*#__PURE__*/React.createElement("div", {
+  }, "Points table"), isLive && heroMatch.liveLink && /*#__PURE__*/React.createElement("a", {
+    href: heroMatch.liveLink,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "bg-orange text-white font-body font-semibold text-sm px-5 py-2.5 rounded-md flex items-center gap-1.5"
+  }, "🔴 Watch Live")), heroMatch && /*#__PURE__*/React.createElement("div", {
     className: "bg-white-06 border border-white-10 rounded-lg mt-8 p-4 sm:p-5 max-w-xl"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-orange font-mono text-[11px] uppercase tracking-widest mb-3"
@@ -797,7 +802,12 @@ function MatchCard({
     className: "flex items-center gap-1 text-orange font-mono text-[10px] uppercase tracking-wider"
   }, /*#__PURE__*/React.createElement("span", {
     className: "live-dot-sm"
-  }), " Live")), completed && (match.team1Score || match.team2Score) && /*#__PURE__*/React.createElement("div", {
+  }), " Live"), live && match.liveLink && /*#__PURE__*/React.createElement("a", {
+    href: match.liveLink,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "inline-flex items-center gap-1 bg-orange text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:bg-opacity-80 ml-2"
+  }, "Watch Live")), completed && (match.team1Score || match.team2Score) && /*#__PURE__*/React.createElement("div", {
     className: "font-mono text-navy-dark-60 text-xs mt-1.5"
   }, match.team1Score || "—", " \xA0·\xA0 ", match.team2Score || "—"), /*#__PURE__*/React.createElement("div", {
     className: "font-mono text-navy-dark-40 text-xs mt-1.5 flex items-center gap-3 flex-wrap"
@@ -889,89 +899,24 @@ function LiveMatchPage({ matches, teams }) {
   }
   const t1 = teams.find(t => t.id === liveMatch.team1Id);
   const t2 = teams.find(t => t.id === liveMatch.team2Id);
-  const currentRuns = liveMatch.currentRuns || 0;
-  const currentWickets = liveMatch.currentWickets || 0;
-  const ballsBowled = liveMatch.ballsBowled || 0;
-  const target = liveMatch.target || null;
-  const innings = liveMatch.innings || 1;
-  const recentBalls = liveMatch.recentBalls || [];
-  const striker = liveMatch.striker || null;
-  const nonStriker = liveMatch.nonStriker || null;
-  const bowler = liveMatch.bowler || null;
-  const commentary = liveMatch.commentary || [];
-  const oversStr = formatOvers(ballsBowled);
-  const crr = computeCRR(currentRuns, ballsBowled);
   return /*#__PURE__*/React.createElement("div", {
-    className: "max-w-xl mx-auto px-5 py-8"
+    className: "max-w-xl mx-auto px-5 py-12 text-center"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-navy-dark rounded-xl p-6 text-white text-center shadow-lg relative overflow-hidden mb-6"
+    className: "bg-navy-dark rounded-2xl p-8 text-white shadow-xl border border-white-10 relative overflow-hidden"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "bg-white-10 text-orange font-mono text-xs uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block"
-  }, "🔴 Innings " + innings), /*#__PURE__*/React.createElement("h2", {
-    className: "font-display text-2xl uppercase mb-2"
-  }, (t1?.name || "TBD") + " vs " + (t2?.name || "TBD")), /*#__PURE__*/React.createElement("div", {
-    className: "font-display text-5xl tracking-wide my-4 text-orange"
-  }, currentRuns + "/" + currentWickets), /*#__PURE__*/React.createElement("div", {
-    className: "text-white-60 font-mono text-sm"
-  }, oversStr + " Overs · CRR: " + crr), target && /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 text-yellow-400 font-semibold text-sm border-t border-white-10 pt-3"
-  }, "Target: " + target + " · Need " + Math.max(0, target - currentRuns) + " from " + (120 - ballsBowled) + " balls")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-blush rounded-xl p-5 border border-navy-dark-05 mb-6"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-mono text-xs text-navy-dark-50 uppercase mb-3 border-b border-navy-dark-08 pb-1"
-  }, "Batsmen"), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-2 mb-4"
-  }, striker && /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center text-sm"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-semibold text-navy-dark"
-  }, striker.name + " *"), /*#__PURE__*/React.createElement("span", {
-    className: "font-mono text-navy-dark-80"
-  }, striker.runs + " (" + striker.balls + ")")), nonStriker && /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center text-sm"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-navy-dark-70"
-  }, nonStriker.name), /*#__PURE__*/React.createElement("span", {
-    className: "font-mono text-navy-dark-70"
-  }, nonStriker.runs + " (" + nonStriker.balls + ")"))), bowler && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h3", {
-    className: "font-mono text-xs text-navy-dark-50 uppercase mb-3 border-b border-navy-dark-08 pb-1"
-  }, "Bowler"), /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center text-sm"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-semibold text-navy-dark"
-  }, bowler.name), /*#__PURE__*/React.createElement("span", {
-    className: "font-mono text-navy-dark-80"
-  }, bowler.wickets + "-" + bowler.runs + " (" + formatOvers(bowler.balls) + ")")))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-blush rounded-xl p-5 border border-navy-dark-05 mb-6"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-mono text-xs text-navy-dark-50 uppercase mb-3"
-  }, "This Over"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2 flex-wrap"
-  }, recentBalls.length === 0 ? /*#__PURE__*/React.createElement("span", {
-    className: "text-navy-dark-30 text-xs font-mono"
-  }, "No balls bowled yet.") : recentBalls.map((ball, idx) => {
-    let ballCls = "bg-navy-dark-10 text-navy-dark";
-    if (ball === "W") ballCls = "bg-red-500 text-white font-bold";else if (ball === "4" || ball === "4s") ballCls = "bg-orange text-white font-bold";else if (ball === "6") ballCls = "bg-green-600 text-white font-bold";else if (ball === "Wd" || ball === "Nb") ballCls = "bg-yellow-500 text-navy-dark";
-    return /*#__PURE__*/React.createElement("span", {
-      key: idx,
-      className: "w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono " + ballCls
-    }, ball);
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-blush rounded-xl p-5 border border-navy-dark-05"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-mono text-xs text-navy-dark-50 uppercase mb-3 border-b border-navy-dark-08 pb-1"
-  }, "Commentary"), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-3 max-h-60 overflow-y-auto pr-2"
-  }, commentary.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "text-navy-dark-30 text-xs font-mono"
-  }, "Waiting for commentary...") : [...commentary].reverse().map((c, idx) => /*#__PURE__*/React.createElement("div", {
-    key: idx,
-    className: "text-xs border-b border-navy-dark-05 pb-2"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-mono font-bold text-orange mr-2"
-  }, c.ball), /*#__PURE__*/React.createElement("span", {
-    className: "text-navy-dark-80 font-body"
-  }, c.text))))));
+    className: "bg-orange/20 text-orange font-mono text-xs uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-6 inline-flex items-center gap-1.5"
+  }, /*#__PURE__*/React.createElement("span", { className: "live-dot" }), "🔴 Live Now"), /*#__PURE__*/React.createElement("h2", {
+    className: "font-display text-3xl uppercase tracking-wide mb-6"
+  }, (t1?.name || "TBD") + " vs " + (t2?.name || "TBD")), liveMatch.liveLink ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    className: "text-white-60 text-sm font-body mb-6"
+  }, "This match is being streamed live. Click the button below to watch the stream!"), /*#__PURE__*/React.createElement("a", {
+    href: liveMatch.liveLink,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "w-full bg-orange hover:bg-opacity-90 text-white font-mono text-sm uppercase tracking-wider py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg"
+  }, "📺 Watch Live Stream")) : /*#__PURE__*/React.createElement("p", {
+    className: "text-white-40 text-sm font-mono mt-4"
+  }, "Streaming link will be available soon.")));
 }
 
 function TeamDetailPage({ teamId, teams, onBack }) {
@@ -1102,6 +1047,7 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
   const [tagline, setTagline] = useState(settings.tagline || "");
   const [logoHeader, setLogoHeader] = useState(settings.logoHeader || "");
   const [logoFooter, setLogoFooter] = useState(settings.logoFooter || "");
+  const [footerLogoHeight, setFooterLogoHeight] = useState(settings.footerLogoHeight || "96px");
 
   useEffect(() => {
     if (settings) {
@@ -1110,6 +1056,7 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
       setTagline(settings.tagline || "");
       setLogoHeader(settings.logoHeader || "");
       setLogoFooter(settings.logoFooter || "");
+      setFooterLogoHeight(settings.footerLogoHeight || "96px");
     }
   }, [settings]);
 
@@ -1570,7 +1517,8 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
       tournamentName,
       tagline,
       logoHeader,
-      logoFooter
+      logoFooter,
+      footerLogoHeight
     });
     alert("Branding settings updated successfully!");
   }
@@ -1602,130 +1550,8 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
   }, 
     /*#__PURE__*/React.createElement(SectionHeading, {
       eyebrow: "Control Panel",
-      title: "Settings & Scorer"
+      title: "Branding & Settings"
     }),
-    
-    // Scorer Board
-    !liveMatch ? 
-    /*#__PURE__*/React.createElement("div", {
-      className: "bg-blush rounded-xl p-5 border border-navy-dark-05 space-y-4"
-    }, 
-      /*#__PURE__*/React.createElement("h3", { className: "font-display text-navy-dark text-lg uppercase" }, "Start Live Scoring"),
-      /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
-        /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Select Fixture"),
-        /*#__PURE__*/React.createElement("select", {
-          className: inputCls(),
-          value: selectedMatchId,
-          onChange: e => {
-            const id = e.target.value;
-            setSelectedMatchId(id);
-            const m = matches.find(x => x.id === id);
-            if (m) {
-              setBattingTeamId(m.team1Id);
-              setVenue(m.venue || "");
-            }
-          }
-        }, 
-          /*#__PURE__*/React.createElement("option", { value: "" }, "Select upcoming match..."),
-          upcoming.map(m => {
-            const tm1 = teams.find(t => t.id === m.team1Id);
-            const tm2 = teams.find(t => t.id === m.team2Id);
-            return /*#__PURE__*/React.createElement("option", { key: m.id, value: m.id }, tm1?.name + " vs " + tm2?.name);
-          })
-        )
-      ),
-      selectedMatch && /*#__PURE__*/React.createElement(React.Fragment, null,
-        /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-3" }, 
-          /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
-            /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Batting First"),
-            /*#__PURE__*/React.createElement("select", {
-              className: inputCls(),
-              value: battingTeamId,
-              onChange: e => setBattingTeamId(e.target.value)
-            }, 
-              /*#__PURE__*/React.createElement("option", { value: selectedMatch.team1Id }, selT1?.name),
-              /*#__PURE__*/React.createElement("option", { value: selectedMatch.team2Id }, selT2?.name)
-            )
-          ),
-          /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
-            /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Venue"),
-            /*#__PURE__*/React.createElement("input", {
-              className: inputCls(),
-              placeholder: "Venue",
-              value: venue,
-              onChange: e => setVenue(e.target.value)
-            })
-          )
-        ),
-        /*#__PURE__*/React.createElement("button", {
-          className: "w-full bg-orange text-white py-2.5 rounded-md font-mono text-sm uppercase tracking-wide",
-          onClick: handleStartLive
-        }, "🔴 Start Live Match")
-      )
-    ) :
-    /*#__PURE__*/React.createElement("div", { className: "bg-blush rounded-xl p-5 border border-navy-dark-05 space-y-4" }, 
-      /*#__PURE__*/React.createElement("div", { className: "bg-navy-dark rounded-xl p-4 text-white text-center" }, 
-        /*#__PURE__*/React.createElement("div", { className: "font-display text-4xl text-orange" }, (liveMatch.currentRuns || 0) + "/" + (liveMatch.currentWickets || 0)),
-        /*#__PURE__*/React.createElement("div", { className: "text-white-60 font-mono text-xs" }, formatOvers(liveMatch.ballsBowled || 0) + " Overs")
-      ),
-      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-5 gap-2" }, 
-        ["0", "1", "2", "3", "4", "6", "W", "Wd", "Nb", "4s"].map(ball => 
-          /*#__PURE__*/React.createElement("button", {
-            key: ball,
-            className: "bg-navy text-white font-mono font-bold py-2 rounded text-center hover:bg-orange transition-colors",
-            onClick: () => handleBall(ball)
-          }, ball)
-        )
-      ),
-      /*#__PURE__*/React.createElement("div", { className: "form-group mt-3" }, 
-        /*#__PURE__*/React.createElement("input", {
-          className: inputCls(),
-          placeholder: "Custom Commentary (Optional)",
-          value: commentaryInput,
-          onChange: e => setCommentaryInput(e.target.value)
-        })
-      ),
-      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-3" }, 
-        /*#__PURE__*/React.createElement("div", { className: "space-y-1" },
-          /*#__PURE__*/React.createElement("label", { className: "block text-[10px] font-mono uppercase text-navy-dark-50" }, "Striker (Facing)"),
-          /*#__PURE__*/React.createElement("input", {
-            className: inputCls(),
-            placeholder: "Striker name",
-            value: bat1,
-            onChange: e => setBat1(e.target.value),
-            onBlur: () => handleUpdateStriker(bat1)
-          })
-        ),
-        /*#__PURE__*/React.createElement("div", { className: "space-y-1" },
-          /*#__PURE__*/React.createElement("label", { className: "block text-[10px] font-mono uppercase text-navy-dark-50" }, "Non-Striker"),
-          /*#__PURE__*/React.createElement("input", {
-            className: inputCls(),
-            placeholder: "Non-Striker name",
-            value: bat2,
-            onChange: e => setBat2(e.target.value),
-            onBlur: () => handleUpdateNonStriker(bat2)
-          })
-        )
-      ),
-      /*#__PURE__*/React.createElement("button", {
-        className: "w-full bg-navy-dark-10 text-navy-dark hover:bg-navy-dark-20 font-mono text-xs py-1.5 rounded transition-colors uppercase tracking-wider",
-        onClick: handleSwapStrikerNonStriker
-      }, "🔄 Swap Striker & Non-Striker"),
-      /*#__PURE__*/React.createElement("div", { className: "space-y-1" },
-        /*#__PURE__*/React.createElement("label", { className: "block text-[10px] font-mono uppercase text-navy-dark-50" }, "Active Bowler"),
-        /*#__PURE__*/React.createElement("input", {
-          className: inputCls(),
-          placeholder: "Bowler name",
-          value: bwl,
-          onChange: e => setBwl(e.target.value),
-          onBlur: () => handleUpdateBowler(bwl)
-        })
-      ),
-      /*#__PURE__*/React.createElement("button", {
-        className: "w-full bg-red-600 text-white font-mono text-sm py-2 rounded-md uppercase tracking-wide",
-        onClick: handleCloseMatch
-      }, "🏁 Complete Match")
-    ),
 
     // Home Featured Match Selector
     /*#__PURE__*/React.createElement("div", {
@@ -1885,6 +1711,15 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
             value: tagline,
             onChange: e => setTagline(e.target.value),
             placeholder: "e.g. Bound By Roots. United By Cricket."
+          })
+        ),
+        /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
+          /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Footer Logo Height (e.g. 96px, 120px)"),
+          /*#__PURE__*/React.createElement("input", {
+            className: inputCls(),
+            value: footerLogoHeight,
+            onChange: e => setFooterLogoHeight(e.target.value),
+            placeholder: "e.g. 96px, 120px"
           })
         ),
         /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-4" }, 
@@ -2087,7 +1922,7 @@ function CricketSite() {
   const [seasons, setSeasons] = useState([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState("");
   const [sponsors, setSponsors] = useState([]);
-  const [settings, setSettings] = useState({ featuredMatchId: "", logoHeader: LOGO_SRC, logoFooter: FOOTER_LOGO_SRC, seasonLabel: SEASON_LABEL, tournamentName: TOURNAMENT_NAME, tagline: TOURNAMENT_TAGLINE });
+  const [settings, setSettings] = useState({ featuredMatchId: "", logoHeader: LOGO_SRC, logoFooter: FOOTER_LOGO_SRC, seasonLabel: SEASON_LABEL, tournamentName: TOURNAMENT_NAME, tagline: TOURNAMENT_TAGLINE, footerLogoHeight: "96px" });
   const [loaded, setLoaded] = useState(false);
   const [section, setSection] = useState("home");
   const [isOwner, setIsOwner] = useState(false);
@@ -2954,7 +2789,12 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("img", {
     src: settings.logoFooter || FOOTER_LOGO_SRC,
     alt: "Patidar Cricket League",
-    className: "h-24 w-auto object-contain mb-4"
+    style: {
+      height: settings.footerLogoHeight || "96px",
+      width: "auto",
+      objectFit: "contain",
+      marginBottom: "1rem"
+    }
   }), /*#__PURE__*/React.createElement("div", {
     className: "team-carousel-container mb-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3117,8 +2957,18 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("option", {
     value: "upcoming"
   }, "Upcoming"), /*#__PURE__*/React.createElement("option", {
+    value: "live"
+  }, "Live"), /*#__PURE__*/React.createElement("option", {
     value: "completed"
-  }, "Completed")), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
+  }, "Completed")), matchForm.status === "live" && /*#__PURE__*/React.createElement("input", {
+    className: inputCls(),
+    placeholder: "External Live Stream / Score Link (e.g. YouTube, CricHeroes)",
+    value: matchForm.liveLink || "",
+    onChange: e => setMatchForm({
+      ...matchForm,
+      liveLink: e.target.value
+    })
+  }), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
   }, /*#__PURE__*/React.createElement("input", {
     className: inputCls(),

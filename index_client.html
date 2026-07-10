@@ -857,7 +857,12 @@ function Hero({
   })), /*#__PURE__*/React.createElement("button", {
     onClick: () => setSection("points"),
     className: "bg-white-10 text-white font-body font-semibold text-sm px-5 py-2.5 rounded-md"
-  }, "Points table")), heroMatch && /*#__PURE__*/React.createElement("div", {
+  }, "Points table"), isLive && heroMatch.liveLink && /*#__PURE__*/React.createElement("a", {
+    href: heroMatch.liveLink,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "bg-orange text-white font-body font-semibold text-sm px-5 py-2.5 rounded-md flex items-center gap-1.5"
+  }, "🔴 Watch Live")), heroMatch && /*#__PURE__*/React.createElement("div", {
     className: "bg-white-06 border border-white-10 rounded-lg mt-8 p-4 sm:p-5 max-w-xl"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-orange font-mono text-[11px] uppercase tracking-widest mb-3"
@@ -950,7 +955,12 @@ function MatchCard({
     className: "flex items-center gap-1 text-orange font-mono text-[10px] uppercase tracking-wider"
   }, /*#__PURE__*/React.createElement("span", {
     className: "live-dot-sm"
-  }), " Live")), completed && (match.team1Score || match.team2Score) && /*#__PURE__*/React.createElement("div", {
+  }), " Live"), live && match.liveLink && /*#__PURE__*/React.createElement("a", {
+    href: match.liveLink,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "inline-flex items-center gap-1 bg-orange text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider hover:bg-opacity-80 ml-2"
+  }, "Watch Live")), completed && (match.team1Score || match.team2Score) && /*#__PURE__*/React.createElement("div", {
     className: "font-mono text-navy-dark-60 text-xs mt-1.5"
   }, match.team1Score || "—", " \xA0·\xA0 ", match.team2Score || "—"), /*#__PURE__*/React.createElement("div", {
     className: "font-mono text-navy-dark-40 text-xs mt-1.5 flex items-center gap-3 flex-wrap"
@@ -1585,9 +1595,14 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
   }, /*#__PURE__*/React.createElement("img", {
-    src: FOOTER_LOGO_SRC,
+    src: settings?.logoFooter || FOOTER_LOGO_SRC,
     alt: "Patidar Cricket League",
-    className: "h-24 w-auto object-contain mb-4"
+    style: {
+      height: settings?.footerLogoHeight || "96px",
+      width: "auto",
+      objectFit: "contain",
+      marginBottom: "1rem"
+    }
   }), /*#__PURE__*/React.createElement("div", {
     className: "team-carousel-container mb-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1816,8 +1831,18 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("option", {
     value: "upcoming"
   }, "Upcoming"), /*#__PURE__*/React.createElement("option", {
+    value: "live"
+  }, "Live"), /*#__PURE__*/React.createElement("option", {
     value: "completed"
-  }, "Completed")), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
+  }, "Completed")), matchForm.status === "live" && /*#__PURE__*/React.createElement("input", {
+    className: inputCls(),
+    placeholder: "External Live Stream / Score Link (e.g. YouTube, CricHeroes)",
+    value: matchForm.liveLink || "",
+    onChange: e => setMatchForm({
+      ...matchForm,
+      liveLink: e.target.value
+    })
+  }), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
   }, /*#__PURE__*/React.createElement("input", {
     className: inputCls(),
