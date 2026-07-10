@@ -1,0 +1,12 @@
+# .gitignore - ignore local configuration files
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.agents/
+.system_generated/
+*.ps1
+search_*.js
+check_*.js
+temp-clone/
