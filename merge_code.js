@@ -224,14 +224,12 @@ function Nav({
 }) {
   const items = [
     ["home", "Home"],
+    ["sponsors", "Sponsors"],
     ["fixtures", "Fixtures"],
     ["points", "Points Table"],
     ["teams", "Teams"],
     ["reports", "Reports"]
   ];
-  if (hasLiveMatch) {
-    items.splice(1, 0, ["live", "🔴 Live"]);
-  }
   if (isOwner) {
     items.push(["admin", "⚙️ Admin"]);
   }
@@ -512,6 +510,8 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
   // Sponsors creation inputs
   const [newSponsorName, setNewSponsorName] = useState("");
   const [newSponsorLogo, setNewSponsorLogo] = useState("");
+  const [newSponsorTier, setNewSponsorTier] = useState("Title Sponsor");
+  const [newSponsorLink, setNewSponsorLink] = useState("");
   
   // Points Table Overrides
   const [overrideTeamId, setOverrideTeamId] = useState(teams[0]?.id || "");
@@ -949,9 +949,11 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
 
   async function handleAddSponsorSubmit() {
     if (!newSponsorName) return;
-    onAddSponsor(newSponsorName, newSponsorLogo);
+    onAddSponsor(newSponsorName, newSponsorLogo, newSponsorTier, newSponsorLink);
     setNewSponsorName("");
     setNewSponsorLogo("");
+    setNewSponsorTier("Title Sponsor");
+    setNewSponsorLink("");
   }
 
   async function handleAddSeasonSubmit() {
@@ -1248,6 +1250,10 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
     }, 
       /*#__PURE__*/React.createElement("h3", { className: "font-display text-navy-dark text-lg uppercase" }, "Sponsors Manager"),
       /*#__PURE__*/React.createElement("input", { className: inputCls(), placeholder: "Sponsor Name", value: newSponsorName, onChange: e => setNewSponsorName(e.target.value) }),
+      /*#__PURE__*/React.createElement("select", { className: inputCls(), value: newSponsorTier, onChange: e => setNewSponsorTier(e.target.value) },
+        ["Title Sponsor", "Platinum Sponsor", "Gold Sponsor", "Silver Sponsor", "Partner"].map(tier => /*#__PURE__*/React.createElement("option", { key: tier, value: tier }, tier))
+      ),
+      /*#__PURE__*/React.createElement("input", { className: inputCls(), placeholder: "Website URL (optional)", value: newSponsorLink, onChange: e => setNewSponsorLink(e.target.value) }),
       /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-3 font-mono text-xs text-navy-dark-50" }, 
         /*#__PURE__*/React.createElement("label", {
           className: "inline-flex items-center gap-1.5 text-xs font-mono uppercase bg-navy-dark-10 text-navy-dark px-3 py-2 rounded-md cursor-pointer"
@@ -1261,8 +1267,11 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
       /*#__PURE__*/React.createElement("div", { className: "space-y-2 mt-4" }, 
         sponsors.map(sp => /*#__PURE__*/React.createElement("div", { key: sp.id, className: "flex justify-between items-center bg-white p-3 rounded-lg text-sm border border-navy-dark-08" }, 
           /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2" }, 
-            sp.logo && /*#__PURE__*/React.createElement("img", { src: sp.logo, className: "h-6 w-auto object-contain" }),
-            /*#__PURE__*/React.createElement("span", { className: "font-semibold text-navy-dark" }, sp.name)
+            sp.logo && /*#__PURE__*/React.createElement("img", { src: sp.logo, className: "h-8 w-auto object-contain rounded border" }),
+            /*#__PURE__*/React.createElement("div", null,
+              /*#__PURE__*/React.createElement("span", { className: "font-semibold text-navy-dark block" }, sp.name),
+              /*#__PURE__*/React.createElement("span", { className: "text-xs text-navy-dark-40 font-mono block" }, sp.tier)
+            )
           ),
           /*#__PURE__*/React.createElement("button", {
             className: "text-xs font-mono text-red-600",
@@ -1660,6 +1669,9 @@ function CricketSite() {
             const parsed = JSON.parse(res.value);
             setTeams(parsed.teams || []);
             setMatches(parsed.matches || []);
+            setSponsors(parsed.sponsors || [
+              { id: "sp-raaj", name: "Raaj Ply & Boards", logo: LOGO_SRC, tier: "Title Sponsor", link: "" }
+            ]);
             if (parsed.settings) {
               setSettings(parsed.settings);
             }
@@ -1668,24 +1680,25 @@ function CricketSite() {
         } catch (e) {}
         if (!gotData) {
           setTeams(SEED_TEAMS);
-          persist(SEED_TEAMS, []);
+          const initialSponsors = [
+            { id: "sp-raaj", name: "Raaj Ply & Boards", logo: LOGO_SRC, tier: "Title Sponsor", link: "" }
+          ];
+          setSponsors(initialSponsors);
+          persist(SEED_TEAMS, [], settings, initialSponsors);
         }
-        setSponsors([
-          { id: "sp-raaj", name: "Raaj Ply & Boards", logo: LOGO_SRC },
-          { id: "sp-amin", name: "Amin Petrochemicals", logo: "" }
-        ]);
         setLoaded(true);
       })();
     }
   }, [selectedSeasonId]);
 
-  async function persist(nextTeams, nextMatches, nextSettings) {
+  async function persist(nextTeams, nextMatches, nextSettings, nextSponsors) {
     if (isFirestoreEnabled && db) return;
     try {
       await storageSet(STORAGE_KEY, JSON.stringify({
         teams: nextTeams,
         matches: nextMatches,
-        settings: nextSettings || settings
+        settings: nextSettings || settings,
+        sponsors: nextSponsors || sponsors
       }));
     } catch (e) {
       console.error("Save failed", e);
@@ -1933,14 +1946,15 @@ function CricketSite() {
   }
 
   // Owner sponsor updates
-  async function handleAddSponsor(name, logo) {
+  async function handleAddSponsor(name, logo, tier, link) {
     const newId = "sp-" + Date.now();
-    const spData = { name, logo };
+    const spData = { name, logo, tier, link };
     if (isFirestoreEnabled && db) {
       await db.collection("seasons").doc(selectedSeasonId).collection("sponsors").doc(newId).set(spData);
     } else {
       const list = [...sponsors, { id: newId, ...spData }];
       setSponsors(list);
+      persist(teams, matches, settings, list);
     }
   }
 
@@ -1950,6 +1964,7 @@ function CricketSite() {
     } else {
       const list = sponsors.filter(sp => sp.id !== id);
       setSponsors(list);
+      persist(teams, matches, settings, list);
     }
   }
 
@@ -2111,6 +2126,46 @@ function CricketSite() {
   }), /*#__PURE__*/React.createElement(PointsTablePreview, {
     standings: standings
   }))))), 
+  
+  section === "sponsors" && /*#__PURE__*/React.createElement("div", {
+    className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
+  }, /*#__PURE__*/React.createElement(SectionHeading, {
+    eyebrow: "Supporting The League",
+    title: "Tournament Sponsors"
+  }), sponsors.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+    text: "No sponsors added yet."
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-6"
+  }, ["Title Sponsor", "Platinum Sponsor", "Gold Sponsor", "Silver Sponsor", "Partner"].map(tier => {
+    const tierSponsors = sponsors.filter(s => s.tier === tier);
+    if (tierSponsors.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: tier,
+      className: "border-b border-navy-dark-10 pb-6 last:border-0"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "font-display text-sm font-bold uppercase text-navy-dark-50 tracking-wider mb-4"
+    }, tier, "s"), /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+    }, tierSponsors.map(s => /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      className: "bg-white border border-navy-dark-10 rounded-lg p-4 flex items-center justify-between shadow-sm hover:shadow transition-shadow"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-4"
+    }, /*#__PURE__*/React.createElement("img", {
+      src: s.logo || LOGO_SRC,
+      alt: s.name,
+      className: "w-16 h-16 object-contain rounded-md border border-navy-dark-10 shrink-0"
+    }), /*#__PURE__*/React.createElement("div", null, s.link ? /*#__PURE__*/React.createElement("a", {
+      href: s.link,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      className: "font-body font-bold text-navy hover:text-orange transition-colors text-base block"
+    }, s.name) : /*#__PURE__*/React.createElement("span", {
+      className: "font-body font-bold text-navy text-base block"
+    }, s.name), /*#__PURE__*/React.createElement("span", {
+      className: "font-mono text-xs text-navy-dark-50 mt-0.5 block"
+    }, s.tier)))))));
+  }))), 
   
   section === "fixtures" && /*#__PURE__*/React.createElement("div", {
     className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
@@ -2489,10 +2544,8 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("option", {
     value: "upcoming"
   }, "Upcoming"), /*#__PURE__*/React.createElement("option", {
-    value: "live"
-  }, "Live"), /*#__PURE__*/React.createElement("option", {
     value: "completed"
-  }, "Completed")), (matchForm.status === "live" || matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
+  }, "Completed")), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
   }, /*#__PURE__*/React.createElement("input", {
     className: inputCls(),

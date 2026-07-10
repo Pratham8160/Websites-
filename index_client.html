@@ -786,7 +786,7 @@ function Nav({
   isOwner,
   onLockClick
 }) {
-  const items = [["home", "Home"], ["fixtures", "Fixtures"], ["points", "Points Table"], ["teams", "Teams"], ["reports", "Match Reports"]];
+  const items = [["home", "Home"], ["sponsors", "Sponsors"], ["fixtures", "Fixtures"], ["points", "Points Table"], ["teams", "Teams"], ["reports", "Match Reports"]];
   return /*#__PURE__*/React.createElement("div", {
     className: "sticky top-0 z-40 bg-white border-b border-navy-dark-10"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1008,9 +1008,15 @@ function Modal({
 function inputCls() {
   return "w-full bg-blush border border-navy-dark-15 rounded-md px-3 py-2 text-sm text-navy-dark font-body outline-none focus:border-orange";
 }
+const DEFAULT_SPONSORS = [
+  { id: "spon-1", name: "Raaj Ply & Boards", tier: "Title Sponsor", logo: LOGO_SRC, link: "" },
+  { id: "spon-2", name: "Chamundi Granites", tier: "Platinum Sponsor", logo: LOGO_SRC, link: "" },
+  { id: "spon-3", name: "Aryans Group", tier: "Gold Sponsor", logo: LOGO_SRC, link: "" }
+];
 function CricketSite() {
   const [teams, setTeams] = useState([]);
   const [matches, setMatches] = useState([]);
+  const [sponsors, setSponsors] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [section, setSection] = useState("home");
   const [isOwner, setIsOwner] = useState(false);
@@ -1024,6 +1030,9 @@ function CricketSite() {
   const [matchForm, setMatchForm] = useState(null);
   const [matchError, setMatchError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [sponsorForm, setSponsorForm] = useState(null);
+  const [sponsorError, setSponsorError] = useState("");
   useEffect(() => {
     (async () => {
       let gotData = false;
@@ -1033,22 +1042,25 @@ function CricketSite() {
           const parsed = JSON.parse(res.value);
           setTeams(parsed.teams || []);
           setMatches(parsed.matches || []);
+          setSponsors(parsed.sponsors || DEFAULT_SPONSORS);
           gotData = true;
         }
       } catch (e) {}
       if (!gotData) {
         // Nothing saved yet anywhere — start the season with the seed lineup.
         setTeams(SEED_TEAMS);
-        persist(SEED_TEAMS, []);
+        setSponsors(DEFAULT_SPONSORS);
+        persist(SEED_TEAMS, [], DEFAULT_SPONSORS);
       }
       setLoaded(true);
     })();
   }, []);
-  async function persist(nextTeams, nextMatches) {
+  async function persist(nextTeams, nextMatches, nextSponsors) {
     try {
       await storageSet(STORAGE_KEY, JSON.stringify({
         teams: nextTeams,
-        matches: nextMatches
+        matches: nextMatches,
+        sponsors: nextSponsors || sponsors
       }));
     } catch (e) {
       console.error("Save failed", e);
@@ -1129,6 +1141,71 @@ function CricketSite() {
     const next = teams.filter(t => t.id !== id);
     setTeams(next);
     persist(next, matches);
+  }
+  function openNewSponsor() {
+    setSponsorForm({
+      id: null,
+      name: "",
+      tier: "Title Sponsor",
+      logo: LOGO_SRC,
+      link: ""
+    });
+    setSponsorError("");
+    setShowSponsorModal(true);
+  }
+  function openEditSponsor(s) {
+    setSponsorForm({
+      ...s
+    });
+    setSponsorError("");
+    setShowSponsorModal(true);
+  }
+  async function handleSponsorLogoFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await fileToLogoDataUrl(file);
+      setSponsorForm(f => ({
+        ...f,
+        logo: dataUrl
+      }));
+    } catch (err) {
+      setSponsorError("Couldn't read that image — try a different file");
+    }
+  }
+  function saveSponsor() {
+    const name = sponsorForm.name.trim();
+    if (!name) {
+      setSponsorError("Enter a sponsor name");
+      return;
+    }
+    const link = sponsorForm.link.trim();
+    let next;
+    if (sponsorForm.id) {
+      next = sponsors.map(s => s.id === sponsorForm.id ? {
+        ...s,
+        name,
+        tier: sponsorForm.tier,
+        logo: sponsorForm.logo || LOGO_SRC,
+        link
+      } : s);
+    } else {
+      next = [...sponsors, {
+        id: uid(),
+        name,
+        tier: sponsorForm.tier,
+        logo: sponsorForm.logo || LOGO_SRC,
+        link
+      }];
+    }
+    setSponsors(next);
+    persist(teams, matches, next);
+    setShowSponsorModal(false);
+  }
+  function deleteSponsor(id) {
+    const next = sponsors.filter(s => s.id !== id);
+    setSponsors(next);
+    persist(teams, matches, next);
   }
   function editNrr(id, value) {
     const next = teams.map(t => t.id === id ? {
@@ -1323,6 +1400,62 @@ function CricketSite() {
     }))
   }), /*#__PURE__*/React.createElement(PointsTablePreview, {
     standings: standings.slice(0, 4)
+  }))), section === "sponsors" && /*#__PURE__*/React.createElement("div", {
+    className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
+  }, /*#__PURE__*/React.createElement(SectionHeading, {
+    eyebrow: "Supporting The League",
+    title: "Tournament Sponsors",
+    action: isOwner && /*#__PURE__*/React.createElement("button", {
+      onClick: openNewSponsor,
+      className: "flex items-center gap-1.5 text-xs font-mono uppercase tracking-wide bg-orange text-white px-3 py-2 rounded-md"
+    }, /*#__PURE__*/React.createElement(Plus, {
+      size: 14
+    }), " Add Sponsor")
+  }), sponsors.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+    text: "No sponsors added yet."
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-6"
+  }, ["Title Sponsor", "Platinum Sponsor", "Gold Sponsor", "Silver Sponsor", "Partner"].map(tier => {
+    const tierSponsors = sponsors.filter(s => s.tier === tier);
+    if (tierSponsors.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: tier,
+      className: "border-b border-navy-dark-10 pb-6 last:border-0"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "font-display text-sm font-bold uppercase text-navy-dark-50 tracking-wider mb-4"
+    }, tier, "s"), /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+    }, tierSponsors.map(s => /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      className: "bg-white border border-navy-dark-10 rounded-lg p-4 flex items-center justify-between shadow-sm hover:shadow transition-shadow"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-4"
+    }, /*#__PURE__*/React.createElement("img", {
+      src: s.logo || LOGO_SRC,
+      alt: s.name,
+      className: "w-16 h-16 object-contain rounded-md border border-navy-dark-10 shrink-0"
+    }), /*#__PURE__*/React.createElement("div", null, s.link ? /*#__PURE__*/React.createElement("a", {
+      href: s.link,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      className: "font-body font-bold text-navy hover:text-orange transition-colors text-base block"
+    }, s.name) : /*#__PURE__*/React.createElement("span", {
+      className: "font-body font-bold text-navy text-base block"
+    }, s.name), /*#__PURE__*/React.createElement("span", {
+      className: "font-mono text-xs text-navy-dark-50 mt-0.5 block"
+    }, s.tier))), isOwner && /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-1 shrink-0"
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => openEditSponsor(s),
+      className: "p-1 rounded hover:bg-navy-dark-10 text-navy-dark-60"
+    }, /*#__PURE__*/React.createElement(Pencil, {
+      size: 13
+    })), /*#__PURE__*/React.createElement("button", {
+      onClick: () => deleteSponsor(s.id),
+      className: "p-1 rounded hover:bg-orange-10 text-orange-70"
+    }, /*#__PURE__*/React.createElement(Trash2, {
+      size: 13
+    }))))))));
   }))), section === "fixtures" && /*#__PURE__*/React.createElement("div", {
     className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
   }, /*#__PURE__*/React.createElement(SectionHeading, {
@@ -1554,7 +1687,73 @@ function CricketSite() {
     className: "w-full bg-orange text-white font-mono text-sm uppercase tracking-wide py-2.5 rounded-md flex items-center justify-center gap-1.5"
   }, /*#__PURE__*/React.createElement(Check, {
     size: 15
-  }), " Save team"))), showMatchModal && matchForm && /*#__PURE__*/React.createElement(Modal, {
+  }), " Save team"))), showSponsorModal && sponsorForm && /*#__PURE__*/React.createElement(Modal, {
+    title: sponsorForm.id ? "Edit Sponsor" : "Add Sponsor",
+    onClose: () => setShowSponsorModal(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: inputCls(),
+    placeholder: "Sponsor Name",
+    value: sponsorForm.name,
+    onChange: e => setSponsorForm({
+      ...sponsorForm,
+      name: e.target.value
+    }),
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("select", {
+    className: inputCls(),
+    value: sponsorForm.tier,
+    onChange: e => setSponsorForm({
+      ...sponsorForm,
+      tier: e.target.value
+    })
+  }, ["Title Sponsor", "Platinum Sponsor", "Gold Sponsor", "Silver Sponsor", "Partner"].map(tier => /*#__PURE__*/React.createElement("option", {
+    key: tier,
+    value: tier
+  }, tier))), /*#__PURE__*/React.createElement("input", {
+    className: inputCls(),
+    placeholder: "Website URL (optional)",
+    value: sponsorForm.link,
+    onChange: e => setSponsorForm({
+      ...sponsorForm,
+      link: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-14 h-14 rounded-md bg-blush border border-navy-dark-15 flex items-center justify-center overflow-hidden shrink-0"
+  }, sponsorForm.logo ? /*#__PURE__*/React.createElement("img", {
+    src: sponsorForm.logo,
+    alt: "Sponsor logo",
+    className: "w-full h-full object-contain p-1"
+  }) : /*#__PURE__*/React.createElement("span", {
+    className: "text-navy-dark-30 text-[9px] font-mono text-center px-1"
+  }, "No logo")), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 flex items-center gap-2 flex-wrap"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wide bg-navy-dark-10 text-navy-dark px-3 py-2 rounded-md cursor-pointer"
+  }, "Upload Logo", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    className: "hidden",
+    onChange: handleSponsorLogoFile
+  })), sponsorForm.logo && sponsorForm.logo !== LOGO_SRC && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSponsorForm({
+      ...sponsorForm,
+      logo: LOGO_SRC
+    }),
+    className: "text-xs font-mono text-orange-70"
+  }, "Remove"))), sponsorError && /*#__PURE__*/React.createElement("p", {
+    className: "text-orange text-xs flex items-center gap-1"
+  }, /*#__PURE__*/React.createElement(AlertCircle, {
+    size: 12
+  }), " ", sponsorError), /*#__PURE__*/React.createElement("button", {
+    onClick: saveSponsor,
+    className: "w-full bg-orange text-white font-mono text-sm uppercase tracking-wide py-2.5 rounded-md flex items-center justify-center gap-1.5"
+  }, /*#__PURE__*/React.createElement(Check, {
+    size: 15
+  }), " Save Sponsor"))), showMatchModal && matchForm && /*#__PURE__*/React.createElement(Modal, {
     title: matchForm.id ? "Edit fixture" : "New fixture",
     onClose: () => setShowMatchModal(false)
   }, /*#__PURE__*/React.createElement("div", {
@@ -1617,10 +1816,8 @@ function CricketSite() {
   }, /*#__PURE__*/React.createElement("option", {
     value: "upcoming"
   }, "Upcoming"), /*#__PURE__*/React.createElement("option", {
-    value: "live"
-  }, "Live"), /*#__PURE__*/React.createElement("option", {
     value: "completed"
-  }, "Completed")), (matchForm.status === "live" || matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
+  }, "Completed")), (matchForm.status === "completed") && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
   }, /*#__PURE__*/React.createElement("input", {
     className: inputCls(),
