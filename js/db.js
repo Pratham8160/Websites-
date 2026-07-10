@@ -225,7 +225,7 @@ PCL.DB = {
     this.set('pointsTable', table);
   },
 
-  nrrStr(nrr) {
-    return (nrr >= 0 ? '+' : '') + nrr.toFixed(3);
-  }
+  // nrrStr(nrr) {
+  //   return (nrr >= 0 ? '+' : '') + nrr.toFixed(3);
+  // }
 };
