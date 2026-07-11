@@ -222,6 +222,28 @@ function Nav({
   onSeasonChange,
   logoSrc
 }) {
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+  useEffect(() => {
+    const currentTheme = localStorage.getItem("theme") || "light";
+    if (currentTheme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    if (nextTheme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  };
+
   const items = [
     ["home", "Home"],
     ...(hasLiveMatch ? [["live", "🔴 Live Match"]] : []),
@@ -266,16 +288,27 @@ function Nav({
     key: key,
     onClick: () => setSection(key),
     className: \`font-body text-sm font-medium px-3 py-2 rounded-md transition-colors \${section === key ? "text-navy bg-blush" : "text-navy-dark-60 hover:text-navy"}\`
-  }, label))), /*#__PURE__*/React.createElement("button", {
-    onClick: onLockClick,
-    className: \`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-mono border shrink-0 \${isOwner ? "border-orange text-orange bg-orange-10" : "border-navy-dark-20 text-navy-dark-60"}\`
-  }, isOwner ? /*#__PURE__*/React.createElement(Unlock, {
-    size: 13
-  }) : /*#__PURE__*/React.createElement(Lock, {
-    size: 13
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "hidden sm:inline"
-  }, isOwner ? "Editing" : "Owner"))), /*#__PURE__*/React.createElement("div", {
+  }, label))), 
+  
+  /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 shrink-0"
+  }, 
+    /*#__PURE__*/React.createElement("button", {
+      onClick: toggleTheme,
+      className: "flex items-center justify-center rounded-full p-1.5 text-navy-dark-60 hover:text-orange transition-colors text-sm bg-blush border border-navy-dark-10 shadow-sm cursor-pointer",
+      title: "Toggle Light/Dark Theme"
+    }, theme === "light" ? "🌙" : "☀️"),
+    /*#__PURE__*/React.createElement("button", {
+      onClick: onLockClick,
+      className: \`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-mono border \${isOwner ? "border-orange text-orange bg-orange-10" : "border-navy-dark-20 text-navy-dark-60"}\`
+    }, isOwner ? /*#__PURE__*/React.createElement(Unlock, {
+      size: 13
+    }) : /*#__PURE__*/React.createElement(Lock, {
+      size: 13
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "hidden sm:inline"
+    }, isOwner ? "Editing" : "Owner"))
+  )), /*#__PURE__*/React.createElement("div", {
     className: "md:hidden flex items-center gap-1 px-4 pb-2 overflow-x-auto"
   }, items.map(([key, label]) => /*#__PURE__*/React.createElement("button", {
     key: key,
@@ -1978,11 +2011,113 @@ function CricketSite() {
         .font-display { font-family: 'Anton', sans-serif; }
         .font-body { font-family: 'Inter', sans-serif; }
         .font-mono { font-family: 'Space Mono', monospace; }
-        .bg-navy { background-color: #1C3D8B; }
-        .bg-navy-dark { background-color: #12285E; }
-        .text-navy { color: #1C3D8B; }
-        .text-navy-dark { color: #12285E; }
-        .bg-blush { background-color: #FDF2F7; }
+        
+        :root {
+          --bg-page: #f8fafc;
+          --text-main: #0f172a;
+          --text-muted: #475569;
+          --text-muted-light: #64748b;
+          --bg-card: #ffffff;
+          --border-color: rgba(18, 40, 94, 0.10);
+          --bg-blush: #FDF2F7;
+          --bg-navy: #1C3D8B;
+          --bg-navy-dark: #12285E;
+          --text-navy: #1C3D8B;
+          --text-navy-dark: #12285E;
+          --border-navy-dark-05: rgba(18,40,94,0.05);
+          --border-navy-dark-08: rgba(18,40,94,0.08);
+          --border-navy-dark-10: rgba(18,40,94,0.10);
+          --border-navy-dark-15: rgba(18,40,94,0.15);
+          --border-navy-dark-20: rgba(18,40,94,0.20);
+          --text-navy-dark-30: rgba(18,40,94,0.30);
+          --text-navy-dark-40: rgba(18,40,94,0.40);
+          --text-navy-dark-50: rgba(18,40,94,0.50);
+        }
+        
+        body.dark {
+          --bg-page: #0b0f19;
+          --text-main: #f8fafc;
+          --text-muted: #94a3b8;
+          --text-muted-light: #64748b;
+          --bg-card: #151c2c;
+          --border-color: rgba(255, 255, 255, 0.10);
+          --bg-blush: #1d2433;
+          --bg-navy: #1d3557;
+          --bg-navy-dark: #1d2433;
+          --text-navy: #60a5fa;
+          --text-navy-dark: #f8fafc;
+          --border-navy-dark-05: rgba(255,255,255,0.05);
+          --border-navy-dark-08: rgba(255,255,255,0.08);
+          --border-navy-dark-10: rgba(255,255,255,0.10);
+          --border-navy-dark-15: rgba(255,255,255,0.15);
+          --border-navy-dark-20: rgba(255,255,255,0.20);
+          --text-navy-dark-30: rgba(255,255,255,0.40);
+          --text-navy-dark-40: rgba(255,255,255,0.50);
+          --text-navy-dark-50: rgba(255,255,255,0.60);
+        }
+        
+        body {
+          background-color: var(--bg-page) !important;
+          color: var(--text-main) !important;
+          transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        
+        .cricket-app {
+          background-color: var(--bg-page) !important;
+          color: var(--text-main) !important;
+        }
+
+        .bg-white {
+          background-color: var(--bg-card) !important;
+          transition: background-color 0.25s ease;
+        }
+        .bg-gray-50, .bg-gray-100 {
+          background-color: var(--bg-page) !important;
+          transition: background-color 0.25s ease;
+        }
+        .border-gray-100 {
+          border-color: var(--border-color) !important;
+          transition: border-color 0.25s ease;
+        }
+
+        .text-gray-900, .text-slate-900 {
+          color: var(--text-main) !important;
+        }
+        .text-gray-500, .text-gray-600, .text-slate-500, .text-slate-600 {
+          color: var(--text-muted) !important;
+        }
+        
+        .bg-navy { background-color: var(--bg-navy) !important; }
+        .bg-navy-dark { background-color: var(--bg-navy-dark) !important; }
+        .text-navy { color: var(--text-navy) !important; }
+        .text-navy-dark { color: var(--text-navy-dark) !important; }
+        .bg-blush { background-color: var(--bg-blush) !important; }
+        
+        .border-navy-dark-05 { border-color: var(--border-navy-dark-05) !important; }
+        .border-navy-dark-08 { border-color: var(--border-navy-dark-08) !important; }
+        .border-navy-dark-10 { border-color: var(--border-navy-dark-10) !important; }
+        .border-navy-dark-15 { border-color: var(--border-navy-dark-15) !important; }
+        .border-navy-dark-20 { border-color: var(--border-navy-dark-20) !important; }
+        
+        .text-navy-dark-30 { color: var(--text-navy-dark-30) !important; }
+        .text-navy-dark-40 { color: var(--text-navy-dark-40) !important; }
+        .text-navy-dark-50 { color: var(--text-navy-dark-50) !important; }
+        
+        body.dark input, body.dark select, body.dark textarea {
+          background-color: var(--bg-page) !important;
+          color: var(--text-main) !important;
+          border-color: var(--border-color) !important;
+        }
+        
+        body.dark option {
+          background-color: var(--bg-card) !important;
+          color: var(--text-main) !important;
+        }
+
+        body.dark .border-dashed {
+          border-color: var(--border-color) !important;
+        }
+
         .text-orange { color: #F05A22; }
         .bg-orange { background-color: #F05A22; }
         .border-orange { border-color: #F05A22; }
@@ -1992,16 +2127,8 @@ function CricketSite() {
         .bg-orange-10 { background-color: rgba(240,90,34,0.10); }
         .bg-white-10 { background-color: rgba(255,255,255,0.10); }
         .bg-white-06 { background-color: rgba(255,255,255,0.06); }
-        .border-navy-dark-05 { border-color: rgba(18,40,94,0.05); }
-        .border-navy-dark-08 { border-color: rgba(18,40,94,0.08); }
-        .border-navy-dark-10 { border-color: rgba(18,40,94,0.10); }
-        .border-navy-dark-15 { border-color: rgba(18,40,94,0.15); }
-        .border-navy-dark-20 { border-color: rgba(18,40,94,0.20); }
         .border-white-10 { border-color: rgba(255,255,255,0.10); }
         .border-white-15 { border-color: rgba(255,255,255,0.15); }
-        .text-navy-dark-30 { color: rgba(18,40,94,0.30); }
-        .text-navy-dark-40 { color: rgba(18,40,94,0.40); }
-        .text-navy-dark-50 { color: rgba(18,40,94,0.50); }
   \`), 
   
   // 1. Navigation Menu
