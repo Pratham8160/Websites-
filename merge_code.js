@@ -465,6 +465,11 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
   const [logoFooter, setLogoFooter] = useState(settings.logoFooter || "");
   const [footerLogoHeight, setFooterLogoHeight] = useState(settings.footerLogoHeight || "96px");
 
+  const [announcementText, setAnnouncementText] = useState(settings.announcementText || "Please submit your player registration details using our official form.");
+  const [announcementLink, setAnnouncementLink] = useState(settings.announcementLink || "https://forms.gle/jNr7rdLXTC4FwYtYA");
+  const [announcementTitle, setAnnouncementTitle] = useState(settings.announcementTitle || "Registration Form");
+  const [showAnnouncementBox, setShowAnnouncementBox] = useState(settings.showAnnouncementBox !== false);
+
   useEffect(() => {
     if (settings) {
       setSeasonLabel(settings.seasonLabel || "");
@@ -473,6 +478,10 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
       setLogoHeader(settings.logoHeader || "");
       setLogoFooter(settings.logoFooter || "");
       setFooterLogoHeight(settings.footerLogoHeight || "96px");
+      setAnnouncementText(settings.announcementText || "Please submit your player registration details using our official form.");
+      setAnnouncementLink(settings.announcementLink || "https://forms.gle/jNr7rdLXTC4FwYtYA");
+      setAnnouncementTitle(settings.announcementTitle || "Registration Form");
+      setShowAnnouncementBox(settings.showAnnouncementBox !== false);
     }
   }, [settings]);
 
@@ -934,7 +943,11 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
       tagline,
       logoHeader,
       logoFooter,
-      footerLogoHeight
+      footerLogoHeight,
+      announcementText,
+      announcementLink,
+      announcementTitle,
+      showAnnouncementBox
     });
     alert("Branding settings updated successfully!");
   }
@@ -1136,6 +1149,45 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
             value: footerLogoHeight,
             onChange: e => setFooterLogoHeight(e.target.value),
             placeholder: "e.g. 96px, 120px"
+          })
+        ),
+        /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
+          /*#__PURE__*/React.createElement("label", { className: "flex items-center gap-2 text-xs font-mono uppercase text-navy-dark-50 cursor-pointer" }, 
+            /*#__PURE__*/React.createElement("input", {
+              type: "checkbox",
+              checked: showAnnouncementBox,
+              onChange: e => setShowAnnouncementBox(e.target.checked)
+            }),
+            "Enable Homepage Announcement Box"
+          })
+        ),
+        showAnnouncementBox && /*#__PURE__*/React.createElement(React.Fragment, null, 
+          /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
+            /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Announcement Title"),
+            /*#__PURE__*/React.createElement("input", {
+              className: inputCls(),
+              value: announcementTitle,
+              onChange: e => setAnnouncementTitle(e.target.value),
+              placeholder: "e.g. Registration Form"
+            })
+          ),
+          /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
+            /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Announcement Description"),
+            /*#__PURE__*/React.createElement("textarea", {
+              className: inputCls() + " h-20 resize-none",
+              value: announcementText,
+              onChange: e => setAnnouncementText(e.target.value),
+              placeholder: "e.g. Please submit your player registration details using our official form."
+            })
+          ),
+          /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
+            /*#__PURE__*/React.createElement("label", { className: "block text-xs font-mono uppercase text-navy-dark-50 mb-1" }, "Announcement Button Link"),
+            /*#__PURE__*/React.createElement("input", {
+              className: inputCls(),
+              value: announcementLink,
+              onChange: e => setAnnouncementLink(e.target.value),
+              placeholder: "e.g. https://forms.gle/jNr7rdLXTC4FwYtYA"
+            })
           })
         ),
         /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-4" }, 
