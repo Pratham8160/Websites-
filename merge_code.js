@@ -1159,7 +1159,7 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
               onChange: e => setShowAnnouncementBox(e.target.checked)
             }),
             "Enable Homepage Announcement Box"
-          })
+          )
         ),
         showAnnouncementBox && /*#__PURE__*/React.createElement(React.Fragment, null, 
           /*#__PURE__*/React.createElement("div", { className: "form-group" }, 
@@ -1188,7 +1188,7 @@ function AdminScorerPage({ matches, teams, seasons, selectedSeasonId, sponsors, 
               onChange: e => setAnnouncementLink(e.target.value),
               placeholder: "e.g. https://forms.gle/jNr7rdLXTC4FwYtYA"
             })
-          })
+          )
         ),
         /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-4" }, 
           /*#__PURE__*/React.createElement("div", { className: "space-y-2" }, 
@@ -1957,17 +1957,17 @@ function CricketSite() {
   }), /*#__PURE__*/React.createElement("div", {
     className: "max-w-5xl mx-auto px-5 sm:px-6 py-10"
   }, 
-    /*#__PURE__*/React.createElement("div", {
+    (settings.showAnnouncementBox !== false) && /*#__PURE__*/React.createElement("div", {
       className: "rounded-2xl p-6 text-white shadow-xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-navy-dark-10 relative overflow-hidden",
       style: { background: "linear-gradient(135deg, #F05A22 0%, #D0400B 100%)" }
     }, 
       /*#__PURE__*/React.createElement("div", { className: "space-y-1 relative z-10 text-left" }, 
         /*#__PURE__*/React.createElement("span", { className: "bg-white-10 text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full text-white font-bold inline-block mb-1" }, "📢 Announcement"),
-        /*#__PURE__*/React.createElement("h3", { className: "font-display text-2xl uppercase tracking-wide text-white" }, "Registration Form"),
-        /*#__PURE__*/React.createElement("p", { className: "text-white-80 text-sm font-body max-w-xl text-white-80" }, "Please submit your player registration details using our official form.")
+        /*#__PURE__*/React.createElement("h3", { className: "font-display text-2xl uppercase tracking-wide text-white" }, settings.announcementTitle || "Registration Form"),
+        /*#__PURE__*/React.createElement("p", { className: "text-white-80 text-sm font-body max-w-xl text-white-80" }, settings.announcementText || "Please submit your player registration details using our official form.")
       ),
-      /*#__PURE__*/React.createElement("a", {
-        href: "https://forms.gle/jNr7rdLXTC4FwYtYA",
+      settings.announcementLink && /*#__PURE__*/React.createElement("a", {
+        href: settings.announcementLink,
         target: "_blank",
         rel: "noopener noreferrer",
         className: "bg-white text-navy font-mono font-bold text-sm uppercase tracking-wider px-6 py-3 rounded-lg hover:bg-blush transition-all duration-200 shadow-md shrink-0 relative z-10 text-center"
