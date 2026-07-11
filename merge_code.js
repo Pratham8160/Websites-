@@ -224,6 +224,7 @@ function Nav({
 }) {
   const items = [
     ["home", "Home"],
+    ...(hasLiveMatch ? [["live", "🔴 Live Match"]] : []),
     ["sponsors", "Sponsors"],
     ["fixtures", "Fixtures"],
     ["points", "Points Table"],
@@ -1638,6 +1639,7 @@ function CricketSite() {
       time: "",
       venue: "",
       status: "upcoming",
+      liveLink: "",
       team1Score: "",
       team2Score: "",
       result: "",
@@ -1684,6 +1686,7 @@ function CricketSite() {
       time: f.time || "",
       venue: f.venue || "",
       status: f.status,
+      liveLink: f.liveLink || "",
       team1Score: f.team1Score || "",
       team2Score: f.team2Score || "",
       result: f.result || "",
@@ -1799,7 +1802,7 @@ function CricketSite() {
   
   // Hero match logic
   const featuredMatch = settings.featuredMatchId ? matches.find(m => m.id === settings.featuredMatchId) : null;
-  const heroMatch = featuredMatch || liveMatch || upcomingSorted[0] || null;
+  const heroMatch = liveMatch || featuredMatch || upcomingSorted[0] || null;
 
   const upcomingList = upcomingSorted.filter(m => m.id !== heroMatch?.id);
   const standings = useMemo(() => computeStandings(teams, matches), [teams, matches]);
