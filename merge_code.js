@@ -1650,10 +1650,34 @@ function CricketSite() {
     if (!file) return;
     try {
       const dataUrl = await fileToLogoDataUrl(file);
-      setTeamForm(f => ({
-        ...f,
-        logo: dataUrl
-      }));
+      if (typeof ImageTracer !== "undefined") {
+        ImageTracer.imageToSVG(
+          dataUrl,
+          function(svgstr) {
+            const svgDataUrl = "data:image/svg+xml;utf8," + encodeURIComponent(svgstr);
+            setTeamForm(f => ({
+              ...f,
+              logo: svgDataUrl
+            }));
+          },
+          {
+            ltres: 1.5,
+            qtres: 1.5,
+            pathomit: 8,
+            colorsampling: 2,
+            numberofcolors: 16,
+            mincolorratio: 0.02,
+            linefilter: true,
+            scale: 1,
+            viewbox: true
+          }
+        );
+      } else {
+        setTeamForm(f => ({
+          ...f,
+          logo: dataUrl
+        }));
+      }
     } catch (err) {
       setTeamError("Couldn't read that image — try a different file");
     }
